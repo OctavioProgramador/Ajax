@@ -10,49 +10,64 @@
 </head>
 
 <body>
-  <div class="container">
+  <div class="cargando container">
     <div class="row">
-      <!-- INICIA LA COLUMNA -->
-      <div class="col-md-4 offset-md-4">
-        <center>
-          <h1>PROPIETARIO</h1>
-        </center>
-
-        <form>
-          <!--Campo Documento-->
-          <div class="mb-3">
-            <label for="doc">Documento</label>
-            <input type="text" name="doc" class="form-control" id="doc" onblur="buscar_datos();">
-          </div>
-          <!--Campo Nombre-->
-          <div class="mb-3">
-            <label for="nombre">Nombre </label>
-            <input type="text" name="nombre" class="form-control" id="nombre">
-          </div>
-          <!--Campo Dirección-->
-          <div class="mb-3">
-            <label for="dir">Dirección </label>
-            <input type="text" name="dir" class="form-control" id="dir">
-          </div>
-          <!--Campo Teléfono-->
-          <div class="mb-3">
-            <label for="tel">Teléfono </label>
-            <input type="text" name="tel" class="form-control" id="tel">
-          </div>
-          <!--Botones-->
-          <center>
-            <input type="button" value="ENVIAR" class="btn btn-success" name="btn_enviar">
-            <input type="button" value="CANCELAR" class="btn btn-danger" name="btn_cancelar">
-          </center>
-        </form>
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
       </div>
     </div>
+  </div>
+  <div class="formulario row">
+    <!-- INICIA LA COLUMNA -->
+    <div class="col-md-4 offset-md-4">
+      <center>
+        <h1>PROPIETARIO</h1>
+      </center>
+
+      <form>
+        <!--Campo Documento-->
+        <div class="mb-3">
+          <label for="doc">Documento</label>
+          <input type="text" name="doc" class="form-control" id="doc" onblur="buscar_datos();">
+        </div>
+        <!--Campo Nombre-->
+        <div class="mb-3">
+          <label for="nombre">Nombre </label>
+          <input type="text" name="nombre" class="form-control" id="nombre">
+        </div>
+        <!--Campo Dirección-->
+        <div class="mb-3">
+          <label for="dir">Dirección </label>
+          <input type="text" name="dir" class="form-control" id="dir">
+        </div>
+        <!--Campo Teléfono-->
+        <div class="mb-3">
+          <label for="tel">Teléfono </label>
+          <input type="text" name="tel" class="form-control" id="tel">
+        </div>
+        <!--Botones-->
+        <center>
+          <input type="button" value="ENVIAR" class="btn btn-success" name="btn_enviar" onclick="guardar();">
+          <input type="button" value="CANCELAR" class="btn btn-danger" name="btn_cancelar" onclick="limpiar();">
+        </center>
+      </form>
+      <div class="resultados"></div>
+
+    </div>
+  </div>
   </div>
 </body>
 
 </html>
 
 <script>
+  $(document).ready(function() {
+    //Aqui el codigo
+    $('.cargando').hide(); //ocultar
+  });
+
   function buscar_datos() {
     doc = $("#doc").val();
 
@@ -66,35 +81,60 @@
       url: 'codigos_php.php',
       type: 'post',
       beforeSend: function() {
-        alert("enviando");
+        $('.formulario').hide(); //ocultar
+        $('.cargando').show();
       },
       error: function() {
         alert("Error");
       },
       complete: function() {
-        alert("¡Listo!");
+        $('.formulario').show(); //ocultar
+        $('.cargando').hide(); //ocultar
       },
       success: function(valores) {
+        $("#nombre").val(valores.nombre);
+        $("#dir").val(valores.direccion);
+        $("#tel").val(valores.telefono);
       }
     })
   }
+
+  function limpiar() {
+    $("#doc").val("");
+    $("#nombre").val("");
+    $("#dir").val("");
+    $("#tel").val("");
+  }
+
+  function guardar() {
+    var parametros = {
+      "guardar": "1",
+      "doc": $("#doc").val(),
+      "nombre": $("#nombre").val(),
+      "dir": $("#dir").val(),
+      "tel": $("#tel").val()
+    };
+    $.ajax({
+      data: parametros,
+      dataType: 'json',
+      url: 'codigos_php.php',
+      type: 'post',
+      beforeSend: function() {
+        $('.formulario').hide(); //ocultar
+        $('.cargando').show();
+      },
+      error: function() {
+        alert("Error");
+      },
+      complete: function() {
+        $('.formulario').show(); //ocultar
+        $('.cargando').hide(); //ocultar
+      },
+      success: function(valores) {
+        $('.resultados').html(mensaje);
+      }
+    })
+    limpiar();
+  }
+  // TODO: agregar eliminar 
 </script>
-
-<?php
-include("bd/abrir_conexion.php");
-
-$doc    = "";
-$nombre = "";
-$dir    = "";
-$tel    = "";
-
-if (isset($_POST['btn_enviar'])) {
-  echo "Presiono el boton Enviar";
-}
-
-if (isset($_POST['btn_cancelar'])) {
-  echo "Presiono el boton Cancelar";
-}
-
-include("bd/cerrar_conexion.php");
-?>
